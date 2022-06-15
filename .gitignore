@@ -12,3 +12,5 @@ dist-newstyle/
 # stack
 .stack-work/
 stack.yaml.lock
+
+.env.local
