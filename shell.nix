@@ -6,6 +6,7 @@ project.shellFor {
 
   buildInputs = with pkgs; [
     cabal-install
+    ghcid
     nixfmt
     haskell.packages.${ghcVersion}.brittany
   ];
