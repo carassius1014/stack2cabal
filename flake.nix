@@ -21,7 +21,7 @@
           overlays = haskellNix.nixpkgsArgs.overlays or [ ]
             ++ [ haskellNix.overlay (self: super: { }) ];
         };
-        ghcVersion = "ghc8107";
+        ghcVersion = "ghc902";
         project = import ./. { inherit pkgs ghcVersion; };
       in {
         devShells.default =
