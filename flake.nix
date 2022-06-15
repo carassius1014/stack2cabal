@@ -26,8 +26,6 @@
       in {
         devShells.default =
           import ./shell.nix { inherit pkgs ghcVersion project; };
-        packages = {
-          default = project;
-        };
+        packages = { default = project; };
       });
 }

@@ -13,13 +13,14 @@ import Prelude hiding (head, reverse, takeWhile)
 
 
 data Stack = Stack
-  { resolver  :: ResolverRef
-  , compiler  :: Maybe Ghc
-  , packages  :: [Package]
-  , extraDeps :: [Dep]
-  , flags     :: Flags
-  , ghcOptions :: GhcOptions
-  } deriving (Show)
+    { resolver :: ResolverRef
+    , compiler :: Maybe Ghc
+    , packages :: [Package]
+    , extraDeps :: [Dep]
+    , flags :: Flags
+    , ghcOptions :: GhcOptions
+    }
+    deriving Show
 
 
 newtype Ghc = Ghc Text
@@ -32,10 +33,11 @@ data Package = Local FilePath
 
 
 data Git = Git
-  { repo    :: Repo
-  , commit  :: Commit
-  , subdirs :: [Subdir]
-  } deriving (Show, Eq, Ord)
+    { repo :: Repo
+    , commit :: Commit
+    , subdirs :: [Subdir]
+    }
+    deriving (Show, Eq, Ord)
 
 
 type Repo = Text
@@ -63,11 +65,12 @@ newtype PackageGhcOpts = PackageGhcOpts (Map PkgId GhcFlags)
 
 
 data GhcOptions = GhcOptions
-  { locals :: Maybe GhcFlags
-  , targets :: Maybe GhcFlags  -- cabal doesn't know about these
-  , everything :: Maybe GhcFlags
-  , packagesGhcOpts :: PackageGhcOpts
-  } deriving (Show)
+    { locals :: Maybe GhcFlags
+    , targets :: Maybe GhcFlags  -- cabal doesn't know about these
+    , everything :: Maybe GhcFlags
+    , packagesGhcOpts :: PackageGhcOpts
+    }
+    deriving Show
 
 emptyGhcOptions :: GhcOptions
 emptyGhcOptions = GhcOptions Nothing Nothing Nothing mempty
@@ -88,18 +91,20 @@ newtype PkgId = PkgId { unPkgId :: PackageIdentifier } deriving (Show, Ord, Eq)
 -- the format used at https://github.com/commercialhaskell/stackage-snapshots
 -- which is similar to the Resolver format.
 data NewResolver = NewResolver
-  { compiler :: Ghc
-  , packages :: [NewDep]
-  , flags    :: Flags
-  } deriving (Show)
+    { compiler :: Ghc
+    , packages :: [NewDep]
+    , flags :: Flags
+    }
+    deriving Show
 
 
 data Resolver = Resolver
-  { resolver :: Maybe ResolverRef
-  , compiler :: Maybe Ghc
-  , deps     :: [Dep]
-  , flags    :: Flags
-  } deriving (Show)
+    { resolver :: Maybe ResolverRef
+    , compiler :: Maybe Ghc
+    , deps :: [Dep]
+    , flags :: Flags
+    }
+    deriving Show
 
 
 -- TODO: remote ResolverRefs

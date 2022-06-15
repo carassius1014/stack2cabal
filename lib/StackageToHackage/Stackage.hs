@@ -13,19 +13,19 @@ import StackageToHackage.Stackage.YAML ()
 import Control.Applicative ((<|>))
 import Control.Monad.Extra (loopM, unlessM)
 import Data.ByteString.Lazy (toStrict)
-import Data.List (nub, foldl', find, (\\))
-import Data.List.NonEmpty (NonEmpty(..), head, nonEmpty, reverse, (<|))
+import Data.List ((\\), find, foldl', nub)
+import Data.List.NonEmpty ((<|), NonEmpty(..), head, nonEmpty, reverse)
 import Data.Maybe (fromMaybe, listToMaybe, mapMaybe)
 import Data.Semigroup
-import Data.Text (Text, replace, unpack, isPrefixOf)
+import Data.Text (Text, isPrefixOf, replace, unpack)
 import Data.YAML (FromYAML, decodeStrict)
 import Network.HTTP.Client (httpLbs, parseRequest, responseBody)
 import Network.HTTP.Client.TLS (getGlobalManager)
 import Prelude hiding (head, reverse, takeWhile)
 import System.Directory
     (XdgDirectory(..), createDirectoryIfMissing, doesFileExist, getXdgDirectory)
-import System.FilePath (takeDirectory, (</>))
-import System.IO (stderr, hPutStrLn)
+import System.FilePath ((</>), takeDirectory)
+import System.IO (hPutStrLn, stderr)
 
 import qualified Data.ByteString as BS
 
@@ -67,11 +67,13 @@ resolve _ (Canned lts) = do
     either fail (\r -> pure (Nothing, r)) $ new2old <$> decode1Strict text
   where
     download =
-        let path = unpack
+        let
+            path = unpack
                 $ replace "." "/" (replace "-" "/" (replace "-0" "-" lts))
             raw = concat
                 [ "https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/"
-                , path, ".yaml"
+                , path
+                , ".yaml"
                 ]
         in do
             manager <- getGlobalManager
@@ -135,12 +137,17 @@ new2old NewResolver { compiler, packages, flags } = Resolver
 -- stack.yaml may add subdirs to the repo of a resolver.
 -- Also see: https://github.com/hasufell/stack2cabal/issues/30
 mergeResolvers :: Resolver -> Resolver -> Resolver
-mergeResolvers (Resolver r c p f) (Resolver r' c' p' f') =
-    Resolver (r <|> r') (c <|> c') (mergeDeps p p') (f <> f')
+mergeResolvers (Resolver r c p f) (Resolver r' c' p' f') = Resolver
+    (r <|> r')
+    (c <|> c')
+    (mergeDeps p p')
+    (f <> f')
   where
     mergeDeps :: [Dep] -> [Dep] -> [Dep]
     mergeDeps lhs rhs =
-        let nonGits = filter (not . isGitDep) lhs <> filter (not . isGitDep) rhs
+        let
+            nonGits =
+                filter (not . isGitDep) lhs <> filter (not . isGitDep) rhs
             gitsLhs = (\(SourceDep dep) -> dep) <$> filter isGitDep lhs
             gitsRhs = (\(SourceDep dep) -> dep) <$> filter isGitDep rhs
             gitMerged = foldl' (\m key -> update key m) gitsRhs gitsLhs
@@ -150,22 +157,28 @@ mergeResolvers (Resolver r c p f) (Resolver r' c' p' f') =
     update :: Git -> [Git] -> [Git]
     update git xs =
         -- find same repos
-        case find (\g -> git { subdirs = [], commit = "" }
-                     == g { subdirs = [], commit = "" })
-                 xs of
-            Just g
-             -- on same commit, just append subdirs
-             | commit g == commit git
-             -> git { subdirs = nub (subdirs git <> subdirs g) }
-                 : delete g xs
-             -- on different commit need to delete subdirs from lower resolver
-             | otherwise
-             -> git
-                 -- > [0, 0, 0] \\ [0, 0]
-                 -- [0]
-                 : g { subdirs = nub (subdirs g) \\ nub (subdirs git) }
-                 : delete g xs
-            Nothing -> git : xs
+        case
+                find
+                    (\g -> git { subdirs = [], commit = "" }
+                        == g { subdirs = [], commit = "" }
+                    )
+                    xs
+            of
+                Just g
+                    |
+                 -- on same commit, just append subdirs
+                      commit g == commit git
+                    -> git { subdirs = nub (subdirs git <> subdirs g) }
+                        : delete g xs
+                    |
+                 -- on different commit need to delete subdirs from lower resolver
+                      otherwise
+                    -> git
+                     -- > [0, 0, 0] \\ [0, 0]
+                     -- [0]
+                        : g { subdirs = nub (subdirs g) \\ nub (subdirs git) }
+                        : delete g xs
+                Nothing -> git : xs
 
     isGitDep :: Dep -> Bool
     isGitDep (SourceDep _) = True

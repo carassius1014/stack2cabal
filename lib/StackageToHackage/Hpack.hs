@@ -2,12 +2,12 @@ module StackageToHackage.Hpack (execHpack, hpackInput) where
 
 
 import Hpack
-    ( defaultOptions
-    , hpackResult
-    , setTarget
+    ( Force(Force)
     , Options(optionsForce)
     , Result
-    , Force(Force)
+    , defaultOptions
+    , hpackResult
+    , setTarget
     )
 import System.FilePath ((</>))
 import System.IO (hPutStrLn, stderr)

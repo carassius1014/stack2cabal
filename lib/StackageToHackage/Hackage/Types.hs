@@ -1,6 +1,7 @@
 module StackageToHackage.Hackage.Types where
 
-import StackageToHackage.Stackage.Types (Ghc, Git, GhcOptions, PkgName, FlagName)
+import StackageToHackage.Stackage.Types
+    (FlagName, Ghc, GhcOptions, Git, PkgName)
 
 import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict (Map)
@@ -15,7 +16,8 @@ data Project = Project
     , pkgs :: NonEmpty FilePath
     , srcs :: [Git]
     , ghcOpts :: GhcOptions
-    } deriving (Show)
+    }
+    deriving Show
 
 
 newtype Freeze = Freeze [Constraint] deriving (Show)
